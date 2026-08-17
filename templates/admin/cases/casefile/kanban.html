@@ -1,0 +1,24 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<div class="kanban-header">
+  <div><p class="eyebrow">SÜREÇ PANOSU</p><h1>{{ title }}</h1><p>Dosyalar yalnızca erişim yetkiniz kapsamında gösterilir.</p></div>
+  <div><a class="secondary-link" href="{% url 'admin:cases_casefile_changelist' %}">Liste görünümü</a> <a class="primary-link" href="{% url 'admin:cases_casefile_add' %}">+ Yeni dosya</a></div>
+</div>
+<div class="kanban-board">
+  {% for column in columns %}
+  <section class="kanban-column">
+    <header><span class="stage-dot stage-{{ column.stage.color }}"></span><strong>{{ column.stage.name }}</strong><span>{{ column.cases|length }}</span></header>
+    <div class="kanban-cards">
+      {% for case in column.cases %}
+      <a class="kanban-card" href="{% url 'admin:cases_casefile_change' case.pk %}">
+        <small>{{ case.reference_number }}</small><strong>{{ case.worker.full_name }}</strong><p>{{ case.subject|truncatechars:80 }}</p>
+        <footer><span>{{ case.responsible_lawyer.get_full_name|default:case.responsible_lawyer.username }}</span>{% if case.next_deadline %}<time>{{ case.next_deadline|date:"d.m.Y" }}</time>{% endif %}</footer>
+      </a>
+      {% empty %}<div class="kanban-empty">Bu aşamada dosya yok.</div>{% endfor %}
+    </div>
+  </section>
+  {% endfor %}
+</div>
+{% endblock %}
+

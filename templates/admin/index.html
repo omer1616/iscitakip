@@ -1,0 +1,52 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+
+{% block title %}Genel Bakış | {{ site_title }}{% endblock %}
+
+{% block branding %}
+  {% include "unfold/helpers/site_branding.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-shell">
+  <div class="dashboard-heading">
+    <div>
+      <p class="eyebrow">ÇALIŞMA ALANI</p>
+      <h1>Hoş geldiniz, {{ request.user.get_full_name|default:request.user.username }}</h1>
+      <p>Dosyaların güncel durumunu ve yaklaşan kritik tarihleri buradan izleyebilirsiniz.</p>
+    </div>
+    <a class="primary-link" href="{% url 'admin:cases_casefile_add' %}">+ Yeni dosya</a>
+  </div>
+
+  <div class="stat-grid">
+    <a class="stat-card" href="{% url 'admin:cases_casefile_changelist' %}"><span>Toplam dosya</span><strong>{{ case_total }}</strong></a>
+    <a class="stat-card" href="{% url 'admin:cases_casefile_changelist' %}"><span>Aktif dosya</span><strong>{{ active_case_total }}</strong></a>
+    <a class="stat-card stat-warning" href="{% url 'admin:cases_casefile_changelist' %}"><span>14 gün içindeki tarihler</span><strong>{{ upcoming_total }}</strong></a>
+    <a class="stat-card stat-danger" href="{% url 'admin:cases_casefile_changelist' %}"><span>Geciken kritik tarih</span><strong>{{ overdue_total }}</strong></a>
+  </div>
+
+  <div class="dashboard-grid">
+    <section class="panel-card">
+      <div class="panel-heading"><h2>Süreç dağılımı</h2><a href="{% url 'admin:cases_casefile_kanban' %}">Kanban'ı aç →</a></div>
+      <div class="stage-list">
+        {% for stage in stage_summary %}
+          <a href="{% url 'admin:cases_casefile_changelist' %}?current_stage__id__exact={{ stage.pk }}">
+            <span class="stage-dot stage-{{ stage.color }}"></span><span>{{ stage.name }}</span><strong>{{ stage.case_total }}</strong>
+          </a>
+        {% empty %}<p>Henüz süreç aşaması tanımlanmadı.</p>{% endfor %}
+      </div>
+    </section>
+    <section class="panel-card">
+      <div class="panel-heading"><h2>Son güncellenen dosyalar</h2><a href="{% url 'admin:cases_casefile_changelist' %}">Tümü →</a></div>
+      <div class="recent-list">
+        {% for case in recent_cases %}
+          <a href="{% url 'admin:cases_casefile_change' case.pk %}">
+            <span><strong>{{ case.reference_number }}</strong><small>{{ case.worker.full_name }} · {{ case.subject|truncatechars:46 }}</small></span>
+            <span class="compact-stage stage-{{ case.current_stage.color }}">{{ case.current_stage.name }}</span>
+          </a>
+        {% empty %}<p>Henüz dosya oluşturulmadı.</p>{% endfor %}
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}
